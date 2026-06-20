@@ -1,0 +1,97 @@
+{% extends 'campaigns/base.html' %}
+{% load campaign_extras %}
+{% block title %}Statistics - {{ campaign.name }}{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'campaign_detail' campaign.id %}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left"></i> Back to {{ campaign.name }}
+    </a>
+    <h4 class="fw-bold mt-2">Detailed Statistics</h4>
+    <p class="text-muted small">{{ campaign.name }}</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total }}</div>
+            <div class="stat-label">Total Tasks</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number text-success">{{ status_data.completed|default:0 }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number text-info">{{ active_tasks }}</div>
+            <div class="stat-label">Active (Locked)</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number" style="color: var(--primary);">{{ completion_rate }}%</div>
+            <div class="stat-label">Completion Rate</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Status Breakdown</h6>
+                <table class="table table-borderless small mb-0">
+                    <tbody>
+                        {% for status_key, status_name in status_labels.items %}
+                        {% with count=status_data|get_item:status_key|default:0 %}
+                        <tr>
+                            <td width="120">
+                                <span class="badge {% if status_key == 'completed' %}bg-success{% elif status_key == 'pending_review' %}bg-primary{% elif status_key == 'visited' %}bg-info{% elif status_key == 'rejected' %}bg-danger{% elif status_key == 'pending' %}bg-warning text-dark{% else %}bg-secondary{% endif %} badge-status">
+                                    {{ status_name }}
+                                </span>
+                            </td>
+                            <td width="50" class="fw-bold">{{ count }}</td>
+                            <td>
+                                {% if total > 0 %}
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar {% if status_key == 'completed' %}bg-success{% elif status_key == 'pending_review' %}bg-primary{% elif status_key == 'visited' %}bg-info{% elif status_key == 'rejected' %}bg-danger{% elif status_key == 'pending' %}bg-warning{% else %}bg-secondary{% endif %}" 
+                                         style="width: {% widthratio count total 100 %}%"></div>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td width="50" class="text-muted">{% widthratio count total 100 %}%</td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Quick Stats</h6>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Overdue (expired locks)</span>
+                    <span class="fw-bold {% if overdue > 0 %}text-danger{% else %}text-success{% endif %}">{{ overdue }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Currently locked</span>
+                    <span class="fw-bold text-info">{{ active_tasks }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Pending available</span>
+                    <span class="fw-bold text-warning">{{ pending_unlocked }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Visited (awaiting proof)</span>
+                    <span class="fw-bold" style="color: #0dcaf0;">{{ status_data.visited|default:0 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

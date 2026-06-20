@@ -1,0 +1,98 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}Tasks - {{ campaign.name }}{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'campaign_detail' campaign.id %}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left"></i> Back to {{ campaign.name }}
+    </a>
+    <h4 class="fw-bold mt-2">Task Management</h4>
+    <p class="text-muted small">{{ total }} tasks total</p>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small fw-medium">Search</label>
+                {{ form.query }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-medium">Status</label>
+                {{ form.status }}
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Search</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'campaign_tasks' campaign.id %}" class="btn btn-outline-secondary w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card-table">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Tasks</span>
+        <span class="badge bg-secondary rounded-pill">{{ tasks|length }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light">
+                <tr>
+                    <th>Contact</th>
+                    <th>Profile</th>
+                    <th>Status</th>
+                    <th>Proof Code</th>
+                    <th>IP Address</th>
+                    <th>Locked At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td class="fw-medium">{{ task.contact.full_name|default:"-" }}</td>
+                    <td><a href="{{ task.contact.profile_url }}" target="_blank" class="text-primary"><i class="bi bi-box-arrow-up-right"></i></a></td>
+                    <td>
+                        <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'visited' %}bg-info{% elif task.status == 'pending_review' %}bg-primary{% elif task.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %} badge-status">
+                            {{ task.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if task.proof_code %}
+                        <code class="user-select-all">{{ task.proof_code }}</code>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">{{ task.ip_address|default:"—" }}</td>
+                    <td class="text-muted small">{{ task.locked_at|date:"H:i"|default:"—" }}</td>
+                    <td>
+                        {% if task.status != 'completed' %}
+                        <form method="post" action="{% url 'task_update_status' task.id %}" class="d-inline">
+                            {% csrf_token %}
+                            {% if task.status == 'rejected' %}
+                            <button name="status" value="pending" class="btn btn-sm btn-outline-warning" title="Reset to Pending"><i class="bi bi-arrow-counterclockwise"></i></button>
+                            {% else %}
+                            <button name="status" value="completed" class="btn btn-sm btn-outline-success" title="Mark Completed"><i class="bi bi-check-lg"></i></button>
+                            <button name="status" value="rejected" class="btn btn-sm btn-outline-danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="bi bi-inbox"></i>
+                            <p class="mb-0">No tasks found</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

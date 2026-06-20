@@ -1,0 +1,69 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}Thank You!{% endblock %}
+{% block content %}
+<style>
+    .public-container { max-width: 500px; margin: 0 auto; text-align: center; }
+    .code-display {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: 8px;
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        border: 2px dashed #0a66c2;
+        border-radius: 12px;
+        padding: 1.5rem;
+        color: var(--primary);
+        user-select: all;
+    }
+    .success-check {
+        width: 80px;
+        height: 80px;
+        background: #d1fae5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .success-check i { font-size: 2.5rem; color: var(--success); }
+</style>
+
+<div class="public-container">
+    <div class="success-check mb-3">
+        <i class="bi bi-check-lg"></i>
+    </div>
+    <h4 class="fw-bold">Thank You!</h4>
+    <p class="text-muted mb-4">Your proof has been submitted successfully. Here's your unique proof code:</p>
+
+    <div class="code-display mb-3" id="proofCode">{{ code }}</div>
+
+    <button class="btn btn-primary btn-lg px-5 mb-4" onclick="copyCode()">
+        <i class="bi bi-clipboard"></i> Copy Code
+    </button>
+
+    <div class="alert alert-info small">
+        <i class="bi bi-info-circle"></i> Submit this code to your micro task site as proof of completion.
+    </div>
+
+    <p class="text-muted small">
+        <i class="bi bi-shield-check"></i> This code verifies your task completion.
+    </p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyCode() {
+        var code = document.getElementById('proofCode').textContent.trim();
+        navigator.clipboard.writeText(code).then(function() {
+            var btn = event.target.closest('button');
+            btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+            btn.className = 'btn btn-success btn-lg px-5 mb-4';
+            setTimeout(function() {
+                btn.innerHTML = '<i class="bi bi-clipboard"></i> Copy Code';
+                btn.className = 'btn btn-primary btn-lg px-5 mb-4';
+            }, 2000);
+        });
+    }
+</script>
+{% endblock %}

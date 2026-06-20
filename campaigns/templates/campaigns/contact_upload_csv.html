@@ -1,0 +1,52 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}Upload Contacts CSV{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'contact_upload_list' %}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left"></i> Back to Contacts
+    </a>
+    <h4 class="fw-bold mt-2">Upload Contacts</h4>
+    <p class="text-muted small">Upload a CSV file containing LinkedIn profile URLs and contact details. After upload, you'll map the columns.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Batch Name</label>
+                        {{ name_form.name }}
+                        <div class="form-text">Give this batch a recognizable name (optional).</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">CSV File</label>
+                        {{ csv_form.csv_file }}
+                        <div class="form-text">CSV with columns like: first_name, last_name, email, profile_url, company, phone, etc.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-upload"></i> Upload & Map Columns
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-info-circle"></i> How it works</h6>
+                <ol class="small text-muted ps-3 mb-0">
+                    <li class="mb-2">Upload a CSV with your contacts</li>
+                    <li class="mb-2">Map your CSV columns to system variables</li>
+                    <li class="mb-2">Contacts are stored and ready to use</li>
+                    <li>Create a campaign and select this contact batch</li>
+                </ol>
+                <hr>
+                <h6 class="fw-bold mb-2">Required Column</h6>
+                <p class="small text-muted mb-0">You must have at least one column that maps to <strong>Profile URL</strong>.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

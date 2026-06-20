@@ -1,0 +1,131 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}Task - Campaign{% endblock %}
+{% block content %}
+<style>
+    .public-container { max-width: 680px; margin: 0 auto; }
+    .timer-badge {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .profile-link-card {
+        background: #e8f0fe;
+        border: 2px dashed #0a66c2;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .profile-link-card .link-url {
+        font-size: 1.1rem;
+        word-break: break-all;
+    }
+    .message-box {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+</style>
+
+<div class="public-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h4 class="fw-bold mb-0"><i class="bi bi-linkedin" style="color: #0a66c2;"></i> Task</h4>
+        </div>
+        <div class="timer-badge">
+            <i class="bi bi-clock"></i> <span id="timer">10:00</span>
+        </div>
+    </div>
+
+    {% if processed_instruction %}
+    <div class="mb-3">
+        {{ processed_instruction|safe }}
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-badge"></i> Profile to Connect to With Note Below</h5>
+            <div class="profile-link-card mb-3">
+                <div class="mb-2">
+                    <span class="badge bg-primary">{{ contact.full_name|default:"Profile" }}</span>
+                </div>
+                <a href="{{ contact.profile_url }}" target="_blank" class="link-url text-decoration-none fw-medium">
+                    {{ contact.profile_url }}
+                </a>
+                <div class="mt-2">
+                    <a href="{{ contact.profile_url }}" target="_blank" class="btn btn-primary btn-sm">
+                        <i class="bi bi-box-arrow-up-right"></i> Open Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-chat-dots"></i> Connection Request Note</h5>
+            <div class="message-box mb-3" id="messageText">{{ message }}</div>
+            <button class="btn btn-outline-primary btn-sm" onclick="copyMessage()">
+                <i class="bi bi-clipboard"></i> Copy Message
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body p-4 text-center">
+            <p class="mb-3 fw-medium">After sending the connection request with note, click the button below:</p>
+            <a href="{% url 'task_done' task.unique_id %}" class="btn btn-success btn-lg px-5">
+                <i class="bi bi-check-lg"></i> I'm Done — Submit Proof
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center text-muted small">
+        <i class="bi bi-shield-lock"></i> This task is assigned to your IP for 10 minutes
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var minutes = 10;
+    var seconds = 0;
+    var timer = setInterval(function() {
+        if (seconds === 0) {
+            if (minutes === 0) {
+                clearInterval(timer);
+                document.getElementById('timer').textContent = 'Expired';
+                return;
+            }
+            minutes--;
+            seconds = 59;
+        } else {
+            seconds--;
+        }
+        document.getElementById('timer').textContent = 
+            String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+    }, 1000);
+
+    function copyMessage() {
+        var text = document.getElementById('messageText').textContent;
+        navigator.clipboard.writeText(text).then(function() {
+            var btn = event.target.closest('button');
+            var original = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+            btn.className = 'btn btn-success btn-sm';
+            setTimeout(function() {
+                btn.innerHTML = original;
+                btn.className = 'btn btn-outline-primary btn-sm';
+            }, 2000);
+        });
+    }
+</script>
+{% endblock %}

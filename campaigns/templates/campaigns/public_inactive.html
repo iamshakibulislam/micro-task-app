@@ -1,0 +1,12 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}Information{% endblock %}
+{% block content %}
+<style>
+    .public-container { max-width: 500px; margin: 4rem auto; text-align: center; }
+</style>
+<div class="public-container">
+    <i class="bi bi-info-circle" style="font-size: 3rem; color: var(--gray-600);"></i>
+    <h4 class="fw-bold mt-3">{{ message }}</h4>
+    <p class="text-muted">If you believe this is an error, please contact the campaign administrator.</p>
+</div>
+{% endblock %}

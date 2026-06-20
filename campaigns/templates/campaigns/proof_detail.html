@@ -1,0 +1,98 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}Proof Detail{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'search_proof' %}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left"></i> Back to Search
+    </a>
+    <h4 class="fw-bold mt-2">Proof Detail</h4>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">Task Information</div>
+            <div class="card-body">
+                <table class="table table-borderless small mb-0">
+                    <tr>
+                        <td class="text-muted">Proof Code</td>
+                        <td class="fw-bold"><code>{{ task.proof_code }}</code></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Contact</td>
+                        <td>{{ task.contact.full_name|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Profile</td>
+                        <td><a href="{{ task.contact.profile_url }}" target="_blank">View Profile <i class="bi bi-box-arrow-up-right"></i></a></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Campaign</td>
+                        <td>{{ task.campaign.name }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Status</td>
+                        <td>
+                            <span class="badge {% if task.status == 'completed' %}bg-success{% elif task.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %} badge-status">
+                                {{ task.status|title }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">IP Address</td>
+                        <td class="text-muted">{{ task.ip_address|default:"N/A" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">Submitted Proof</div>
+            <div class="card-body">
+                {% for proof in proofs %}
+                    <div class="mb-3">
+                        {% if proof.image %}
+                        <div class="mb-2">
+                            <label class="text-muted small fw-medium">Screenshot:</label>
+                            <a href="{{ proof.image.url }}" target="_blank" class="d-block mt-1">
+                                <img src="{{ proof.image.url }}" class="img-fluid rounded border" style="max-height: 300px;" alt="Proof screenshot">
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if proof.text %}
+                        <div>
+                            <label class="text-muted small fw-medium">Text Proof:</label>
+                            <pre class="bg-light p-3 rounded small mt-1 mb-0" style="white-space: pre-wrap;">{{ proof.text }}</pre>
+                        </div>
+                        {% endif %}
+                        <div class="text-muted small mt-2">Submitted: {{ proof.submitted_at|date:"M d, Y H:i" }}</div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No proof submitted yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if task.status != 'completed' or task.status == 'rejected' %}
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Actions</h6>
+                <form method="post" class="d-flex gap-2">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="approve" class="btn btn-success px-4">
+                        <i class="bi bi-check-lg"></i> Approve & Mark Completed
+                    </button>
+                    <button type="submit" name="action" value="reject" class="btn btn-danger px-4">
+                        <i class="bi bi-x-lg"></i> Reject & Release Task
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

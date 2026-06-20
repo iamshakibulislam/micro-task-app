@@ -1,0 +1,179 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}Dashboard - Campaign Manager{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1">Dashboard</h4>
+        <p class="text-muted small mb-0">Overview of all campaigns and tasks</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'contact_upload_csv' %}" class="btn btn-outline-primary">
+            <i class="bi bi-upload"></i> Upload Contacts
+        </a>
+        <a href="{% url 'campaign_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New Campaign
+        </a>
+    </div>
+</div>
+
+{% if active_campaign %}
+<div class="alert alert-success d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <i class="bi bi-play-circle-fill me-2"></i>
+        <strong>{{ active_campaign.name }}</strong> is currently active
+    </div>
+    <a href="{% url 'campaign_detail' active_campaign.id %}" class="btn btn-sm btn-outline-success">View Campaign</a>
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number">{{ total_tasks }}</div>
+                    <div class="stat-label">Total Tasks</div>
+                </div>
+                <i class="bi bi-list-task stat-icon" style="color: var(--primary);"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-success">{{ completed_tasks }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <i class="bi bi-check-circle-fill stat-icon" style="color: var(--success);"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number text-warning">{{ pending_tasks }}</div>
+                    <div class="stat-label">Pending / Visited</div>
+                </div>
+                <i class="bi bi-hourglass-split stat-icon" style="color: var(--warning);"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-number" style="color: var(--primary);">{{ completion_rate }}%</div>
+                    <div class="stat-label">Completion Rate</div>
+                </div>
+                <i class="bi bi-graph-up-arrow stat-icon" style="color: var(--primary);"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-table mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Campaigns</span>
+        <span class="badge bg-secondary rounded-pill">{{ campaigns|length }}</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Contacts</th>
+                    <th>Status</th>
+                    <th>Proof Type</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in campaigns %}
+                <tr>
+                    <td class="fw-medium">{{ c.name }}</td>
+                    <td>
+                        {% if c.contact_upload %}
+                        <span class="badge bg-info badge-status">{{ c.contact_upload.contacts.count }}</span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.status == 'active' %}
+                            <span class="badge bg-success badge-status">Active</span>
+                        {% elif c.status == 'completed' %}
+                            <span class="badge bg-secondary badge-status">Completed</span>
+                        {% elif c.status == 'disabled' %}
+                            <span class="badge bg-danger badge-status">Disabled</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark badge-status">Draft</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ c.get_proof_type_display }}</span></td>
+                    <td class="text-muted small">{{ c.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'campaign_detail' c.id %}" class="btn btn-outline-primary" title="View"><i class="bi bi-eye"></i></a>
+                            <a href="{% url 'campaign_edit' c.id %}" class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></a>
+                            {% if c.status == 'draft' or c.status == 'disabled' %}
+                            <a href="{% url 'campaign_activate' c.id %}" class="btn btn-outline-success" title="Activate"><i class="bi bi-play-fill"></i></a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="bi bi-folder-plus"></i>
+                            <p class="mb-2">No campaigns yet</p>
+                            <a href="{% url 'campaign_create' %}" class="btn btn-primary btn-sm">Create your first campaign</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card-table">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Recent Contact Uploads</span>
+        <a href="{% url 'contact_upload_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Contacts</th>
+                    <th>Uploaded</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in contact_uploads|slice:":5" %}
+                <tr>
+                    <td class="fw-medium">{{ u.name|default:"Unnamed" }}</td>
+                    <td><span class="badge bg-primary rounded-pill">{{ u.contacts.count }}</span></td>
+                    <td class="text-muted small">{{ u.created_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">
+                        <div class="empty-state">
+                            <i class="bi bi-people"></i>
+                            <p class="mb-2">No contacts uploaded yet</p>
+                            <a href="{% url 'contact_upload_csv' %}" class="btn btn-primary btn-sm">Upload CSV</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

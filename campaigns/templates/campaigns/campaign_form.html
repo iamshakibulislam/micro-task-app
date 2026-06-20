@@ -1,0 +1,79 @@
+{% extends 'campaigns/base.html' %}
+{% block title %}{{ title }} - Campaign Manager{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% if campaign %}{% url 'campaign_detail' campaign.id %}{% else %}{% url 'dashboard' %}{% endif %}" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+    <h4 class="fw-bold mt-2">{{ title }}</h4>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                    <div class="alert alert-danger py-2 small">
+                        {% for field, errors in form.errors.items %}
+                        {% for error in errors %}{{ field|title }}: {{ error }}<br>{% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Campaign Name</label>
+                        {{ form.name }}
+                        <div class="form-text">Give your campaign a recognizable name.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Contacts <span class="text-danger">*</span></label>
+                        {{ form.contact_upload }}
+                        <div class="form-text">
+                            Select the contact batch to use. 
+                            <a href="{% url 'contact_upload_csv' %}" class="text-decoration-none">Upload new contacts first</a> if you haven't already.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Custom Instructions</label>
+                        {{ form.custom_instruction }}
+                        <div class="form-text">These instructions will be shown to users when they visit the task URL.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Message Template</label>
+                        {{ form.message_template }}
+                        <div class="form-text">
+                            Use variables: <code>{first_name}</code> <code>{last_name}</code> <code>{full_name}</code>
+                            <code>{email}</code> <code>{domain}</code> <code>{company}</code> <code>{phone}</code> <code>{profile}</code>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Proof Type</label>
+                        {{ form.proof_type }}
+                        <div class="form-text">What type of proof do you want from users?</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-lg"></i> 
+                        {% if campaign %}Save Changes{% else %}Create Campaign{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3"><i class="bi bi-info-circle"></i> How it works</h6>
+                <ol class="small text-muted ps-3 mb-0">
+                    <li class="mb-2">Go to <strong>Contacts</strong> and upload a CSV first</li>
+                    <li class="mb-2">Create your campaign and select the contact batch</li>
+                    <li class="mb-2">Set your message template with variables</li>
+                    <li class="mb-3">Activate the campaign — tasks are created automatically</li>
+                    <li class="mb-2">Share the task URLs with your workers</li>
+                    <li>Only one campaign can be active at a time</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
